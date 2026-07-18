@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-dashboard-bg: #0F1115;
+  --color-panel-bg: #16191F;
+  --color-widget-bg: #1A1E26;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background-color: #0F1115;
+  color: #E0E0E0;
+  font-family: var(--font-sans);
+}
+
+/* Custom fine-tunings for ranges */
+input[type="range"]::-webkit-slider-thumb {
+  background: #22c55e;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 6px #22c55e;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: #22c55e;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 6px #22c55e;
+  cursor: pointer;
+}
+
+/* Custom scrollbars for a cleaner high density dashboard look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0F1115;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a303c;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f495a;
+}
+

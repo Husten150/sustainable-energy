@@ -1,0 +1,6 @@
+{
+  "name": "FIFA 2026 Resource & Health Intelligence Platform",
+  "description": "A full-stack, data-driven platform for optimizing sustainability, Energy-Food-Water nexus footprints, and public health heat mitigation across all 11 US host cities for FIFA World Cup 2026.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
