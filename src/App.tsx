@@ -4,6 +4,8 @@ import { HostCity, Intervention } from "./types";
 import CitySelector from "./components/CitySelector";
 import ResourceNexusCard from "./components/ResourceNexusCard";
 import HealthBuiltEnvCard from "./components/HealthBuiltEnvCard";
+import ResourceNexusComparison from "./components/ResourceNexusComparison";
+import HealthBuiltEnvComparison from "./components/HealthBuiltEnvComparison";
 import UnleashSandbox from "./components/UnleashSandbox";
 import { Trophy, Leaf, HeartPulse, Sparkles, Layers, ShieldAlert, ThermometerSun, MapPin } from "lucide-react";
 
@@ -14,10 +16,22 @@ export default function App() {
   const [activePolicies, setActivePolicies] = useState<Intervention[]>([]);
   const [activeTab, setActiveTab] = useState<"nexus" | "health" | "unleash">("nexus");
 
+  // Comparison View states
+  const [isComparisonMode, setIsComparisonMode] = useState<boolean>(false);
+  const [compareCity, setCompareCity] = useState<HostCity>(HOST_CITIES[4]); // Defaults to Dallas, TX (AT&T Stadium) for robust hot city comparison
+  const [compareTemperature, setCompareTemperature] = useState<number>(HOST_CITIES[4].avgSummerTemp);
+
   // Sync temperature if selected host city changes
   useEffect(() => {
     setTemperature(selectedCity.avgSummerTemp);
   }, [selectedCity]);
+
+  // Sync comparison temperature if compareCity changes
+  useEffect(() => {
+    if (compareCity) {
+      setCompareTemperature(compareCity.avgSummerTemp);
+    }
+  }, [compareCity]);
 
   // Handle toggle intervention policies
   const handleTogglePolicy = (policy: Intervention) => {
@@ -33,6 +47,7 @@ export default function App() {
 
   // Run environmental stress simulation engine
   const simulation = simulateScenario(selectedCity, crowdMode, temperature, activePolicies);
+  const simulationB = simulateScenario(compareCity, crowdMode, compareTemperature, activePolicies);
 
   // Global counts for badges
   const energySavingsCount = activePolicies.filter(p => p.category === "energy").length;
@@ -65,19 +80,38 @@ export default function App() {
           <div className="flex flex-wrap items-center gap-2" id="quick-hud-meters">
             <div className="bg-[#1A1E26] border border-white/10 rounded px-3 py-1.5 text-center min-w-[100px]">
               <span className="block text-[8px] uppercase tracking-wider text-gray-500 font-bold font-sans">CO₂ Mitigation</span>
-              <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">{simulation.carbonFootprint} MT CO₂e</span>
+              <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">
+                {isComparisonMode 
+                  ? `A: ${simulation.carbonFootprint} | B: ${simulationB.carbonFootprint} MT` 
+                  : `${simulation.carbonFootprint} MT CO₂e`
+                }
+              </span>
             </div>
             <div className="bg-[#1A1E26] border border-white/10 rounded px-3 py-1.5 text-center min-w-[100px]">
               <span className="block text-[8px] uppercase tracking-wider text-gray-500 font-bold font-sans">Nexus Stress</span>
               <span className={`text-xs font-mono font-bold mt-0.5 block ${
-                simulation.nexusStressScore > 70 ? "text-red-400 shadow-[0_0_8px_rgba(239,68,68,0.2)]" : simulation.nexusStressScore > 40 ? "text-amber-400" : "text-emerald-400"
-              }`}>{simulation.nexusStressScore}%</span>
+                simulation.nexusStressScore > 70 || (isComparisonMode && simulationB.nexusStressScore > 70) 
+                  ? "text-red-400 shadow-[0_0_8px_rgba(239,68,68,0.2)]" 
+                  : "text-emerald-400"
+              }`}>
+                {isComparisonMode
+                  ? `A: ${simulation.nexusStressScore}% | B: ${simulationB.nexusStressScore}%`
+                  : `${simulation.nexusStressScore}%`
+                }
+              </span>
             </div>
             <div className="bg-[#1A1E26] border border-white/10 rounded px-3 py-1.5 text-center min-w-[100px]">
               <span className="block text-[8px] uppercase tracking-wider text-gray-500 font-bold font-sans">Heat Cases</span>
               <span className={`text-xs font-mono font-bold mt-0.5 block ${
-                simulation.publicHealthAdmissions > 25 ? "text-red-400" : "text-white"
-              }`}>{simulation.publicHealthAdmissions}/day</span>
+                simulation.publicHealthAdmissions > 25 || (isComparisonMode && simulationB.publicHealthAdmissions > 25) 
+                  ? "text-red-400" 
+                  : "text-white"
+              }`}>
+                {isComparisonMode
+                  ? `A: ${simulation.publicHealthAdmissions} | B: ${simulationB.publicHealthAdmissions}/day`
+                  : `${simulation.publicHealthAdmissions}/day`
+                }
+              </span>
             </div>
           </div>
         </div>
@@ -94,11 +128,16 @@ export default function App() {
             setTemperature={setTemperature}
             crowdMode={crowdMode}
             setCrowdMode={setCrowdMode}
+            isComparisonMode={isComparisonMode}
+            compareCity={compareCity}
+            onSelectCompareCity={setCompareCity}
+            compareTemperature={compareTemperature}
+            setCompareTemperature={setCompareTemperature}
           />
         </section>
 
-        {/* Dynamic Focus Tabs (Track 2, Track 3, UNLEASH Sandbox) */}
-        <div className="border-b border-white/10" id="dashboard-navigation-tabs">
+        {/* Dynamic Focus Tabs (Track 2, Track 3, UNLEASH Sandbox) & Comparison Toggle */}
+        <div className="border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4" id="dashboard-navigation-tabs">
           <nav className="flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => setActiveTab("nexus")}
@@ -134,36 +173,84 @@ export default function App() {
               UNLEASH Innovation Sandbox
             </button>
           </nav>
+
+          {/* Toggle Dual City Comparison Mode */}
+          <div className="pb-2.5">
+            <button
+              id="comparison-view-toggle"
+              onClick={() => setIsComparisonMode(!isComparisonMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-mono font-bold uppercase transition-all shadow-sm border ${
+                isComparisonMode
+                  ? "bg-[#f43f5e]/15 border-rose-500 text-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.2)] font-extrabold"
+                  : "bg-[#1A1E26] border-white/10 text-slate-400 hover:text-white hover:border-white/25"
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              {isComparisonMode ? "Comparing: ACTIVE" : "Compare dual cities"}
+            </button>
+          </div>
         </div>
 
         {/* Tab Viewport Panels */}
         <section className="transition-all duration-300" id="tab-viewport">
           {activeTab === "nexus" && (
             <div className="space-y-6">
-              <ResourceNexusCard
-                selectedCity={selectedCity}
-                activePolicies={activePolicies}
-                onTogglePolicy={handleTogglePolicy}
-                simulation={simulation}
-                temperature={temperature}
-              />
+              {isComparisonMode ? (
+                <ResourceNexusComparison
+                  cityA={selectedCity}
+                  cityB={compareCity}
+                  simulationA={simulation}
+                  simulationB={simulationB}
+                  activePolicies={activePolicies}
+                  onTogglePolicy={handleTogglePolicy}
+                  temperatureA={temperature}
+                  temperatureB={compareTemperature}
+                />
+              ) : (
+                <ResourceNexusCard
+                  selectedCity={selectedCity}
+                  activePolicies={activePolicies}
+                  onTogglePolicy={handleTogglePolicy}
+                  simulation={simulation}
+                  temperature={temperature}
+                />
+              )}
             </div>
           )}
 
           {activeTab === "health" && (
             <div className="space-y-6">
-              <HealthBuiltEnvCard
-                selectedCity={selectedCity}
-                activePolicies={activePolicies}
-                onTogglePolicy={handleTogglePolicy}
-                simulation={simulation}
-                temperature={temperature}
-              />
+              {isComparisonMode ? (
+                <HealthBuiltEnvComparison
+                  cityA={selectedCity}
+                  cityB={compareCity}
+                  simulationA={simulation}
+                  simulationB={simulationB}
+                  activePolicies={activePolicies}
+                  onTogglePolicy={handleTogglePolicy}
+                  temperatureA={temperature}
+                  temperatureB={compareTemperature}
+                />
+              ) : (
+                <HealthBuiltEnvCard
+                  selectedCity={selectedCity}
+                  activePolicies={activePolicies}
+                  onTogglePolicy={handleTogglePolicy}
+                  simulation={simulation}
+                  temperature={temperature}
+                />
+              )}
             </div>
           )}
 
           {activeTab === "unleash" && (
             <div className="space-y-6">
+              {isComparisonMode && (
+                <div className="bg-indigo-500/10 border border-indigo-500/20 rounded p-3 text-xs text-indigo-400 font-mono flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 animate-pulse" />
+                  Note: UNLEASH Sandbox runs simulations on Slot A ({selectedCity.name}). Turn off comparison mode to edit cities individually.
+                </div>
+              )}
               <UnleashSandbox
                 selectedCity={selectedCity}
               />
