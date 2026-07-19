@@ -15,9 +15,13 @@ app.use(express.json());
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient() {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+      throw new Error("GEMINI_API_KEY environment variable is missing or using placeholder.");
+    }
+    apiKey = apiKey.replace(/^["']|["']$/g, "").trim();
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is missing.");
+      throw new Error("GEMINI_API_KEY is empty after removing quotes.");
     }
     aiClient = new GoogleGenAI({
       apiKey,
@@ -29,6 +33,20 @@ function getGeminiClient() {
     });
   }
   return aiClient;
+}
+
+// Helper to sanitize Gemini response text containing potential markdown JSON blocks
+function cleanJsonResponse(text: string): string {
+  let cleaned = text.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.substring(7);
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.substring(3);
+  }
+  if (cleaned.endsWith("```")) {
+    cleaned = cleaned.substring(0, cleaned.length - 3);
+  }
+  return cleaned.trim();
 }
 
 // Host City profiles metadata for server intelligence
@@ -145,12 +163,17 @@ app.post("/api/gemini/analyze", async (req, res) => {
     });
 
     const text = response.text || "{}";
-    const result = JSON.parse(text);
+    const result = JSON.parse(cleanJsonResponse(text));
     res.json(result);
   } catch (error: any) {
-    console.warn("Gemini API error or missing key. Falling back to high-fidelity heuristics.", error.message);
+    const errorMsg = error instanceof Error ? error.message : (error && typeof error === "object" && "message" in error ? (error as any).message : String(error));
+    console.warn("Gemini API error or missing key. Falling back to high-fidelity heuristics.", errorMsg);
     const mockResult = getMockCityAnalysis(cityId, temperature, activePolicies);
-    res.json(mockResult);
+    res.json({
+      ...mockResult,
+      isMock: true,
+      errorDetails: errorMsg,
+    });
   }
 });
 
@@ -203,16 +226,18 @@ app.post("/api/unleash/ideate", async (req, res) => {
     });
 
     const text = response.text || "{}";
-    const result = JSON.parse(text);
+    const result = JSON.parse(cleanJsonResponse(text));
     res.json(result);
   } catch (error: any) {
-    console.warn("Gemini API error or missing key in Sandbox. Returning interactive simulation response.", error.message);
+    const errorMsg = error instanceof Error ? error.message : (error && typeof error === "object" && "message" in error ? (error as any).message : String(error));
+    console.warn("Gemini API error or missing key in Sandbox. Returning interactive simulation response.", errorMsg);
     
     // High-quality fallback when Gemini is unavailable
     const randomImpact = Math.round(55 + Math.random() * 30);
     const randomFeasible = Math.round(60 + Math.random() * 30);
     res.json({
       isMock: true,
+      errorDetails: errorMsg,
       solutionName: `EcoPulse - ${challengeArea} Optimizer`,
       impactScore: randomImpact,
       feasibilityScore: randomFeasible,

@@ -60,6 +60,7 @@ export interface GeminiAnalysis {
 
 export interface UnleashSolution {
   isMock?: boolean;
+  errorDetails?: string;
   solutionName: string;
   impactScore: number;
   feasibilityScore: number;

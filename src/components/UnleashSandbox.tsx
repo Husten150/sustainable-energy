@@ -19,10 +19,12 @@ export default function UnleashSandbox({ selectedCity }: UnleashSandboxProps) {
   const [evaluation, setEvaluation] = useState<UnleashSolution | null>(null);
   const [loading, setLoading] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleEvaluate = async () => {
     setLoading(true);
     setEvaluation(null);
+    setErrorMsg(null);
     try {
       const response = await fetch("/api/unleash/ideate", {
         method: "POST",
@@ -33,11 +35,36 @@ export default function UnleashSandbox({ selectedCity }: UnleashSandboxProps) {
           challengeArea,
         }),
       });
+      
+      if (!response.ok) {
+        let errMsg = `Server responded with status ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) {
+            errMsg = errData.error;
+          } else if (errData && errData.message) {
+            errMsg = errData.message;
+          }
+        } catch {
+          // Response body was not JSON (could be Express error HTML page)
+          try {
+            const text = await response.text();
+            if (text && text.length < 500) {
+              errMsg = text;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errMsg);
+      }
+      
       const data = await response.json();
       setEvaluation(data);
       setStep(3); // Go to results step
-    } catch (error) {
+    } catch (error: any) {
       console.error("Evaluation failed", error);
+      setErrorMsg(error?.message || String(error));
     } finally {
       setLoading(false);
     }
@@ -175,6 +202,19 @@ export default function UnleashSandbox({ selectedCity }: UnleashSandboxProps) {
             </span>
           </div>
 
+          {errorMsg && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-3.5 flex items-start gap-3 text-red-400 text-xs font-sans">
+              <AlertTriangle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+              <div>
+                <strong className="font-extrabold uppercase text-[10px] font-mono tracking-wider block text-red-500">Evaluation Engine Exception</strong>
+                <p className="mt-1 text-slate-300 font-mono text-[11px] leading-relaxed break-all bg-black/20 p-2 rounded border border-white/5">{errorMsg}</p>
+                <p className="mt-2 text-[10px] text-slate-400">
+                  Please verify that the development server is active on port 3000, and ensure your GEMINI_API_KEY is correctly set in your environment or Secrets tab.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-between items-center pt-2">
             <button
               onClick={() => setStep(1)}
@@ -294,9 +334,19 @@ export default function UnleashSandbox({ selectedCity }: UnleashSandboxProps) {
           </div>
           
           {evaluation.isMock && (
-            <div className="text-[9px] font-mono text-slate-500 flex items-center gap-1 justify-center mt-1 uppercase">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-500/50" />
-              Evaluation created via fail-safe client heuristic model. To activate complete Gemini evaluation, verify key.
+            <div className="space-y-2 max-w-3xl mx-auto">
+              <div className="text-[9px] font-mono text-slate-500 flex items-center gap-1 justify-center mt-1 uppercase">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500/50" />
+                Evaluation created via fail-safe client heuristic model. To activate complete Gemini evaluation, verify key.
+              </div>
+              {evaluation.errorDetails && (
+                <div className="bg-[#1D1E24] border border-amber-500/20 text-amber-400 text-[10px] font-mono p-3 rounded leading-relaxed whitespace-pre-wrap">
+                  <div className="font-extrabold text-[9px] uppercase tracking-wider text-amber-500 mb-1.5 flex items-center gap-1 justify-center">
+                    <AlertTriangle className="w-3 h-3" /> Server Diagnostic Log (Gemini Connection Status)
+                  </div>
+                  <div className="bg-black/30 p-2 rounded border border-white/5 text-slate-300 text-center break-all">{evaluation.errorDetails}</div>
+                </div>
+              )}
             </div>
           )}
         </div>
