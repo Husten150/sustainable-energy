@@ -7,6 +7,7 @@ import HealthBuiltEnvCard from "./components/HealthBuiltEnvCard";
 import ResourceNexusComparison from "./components/ResourceNexusComparison";
 import HealthBuiltEnvComparison from "./components/HealthBuiltEnvComparison";
 import UnleashSandbox from "./components/UnleashSandbox";
+import NotificationBanner from "./components/NotificationBanner";
 import { Trophy, Leaf, HeartPulse, Sparkles, Layers, ShieldAlert, ThermometerSun, MapPin } from "lucide-react";
 
 export default function App() {
@@ -135,6 +136,19 @@ export default function App() {
             setCompareTemperature={setCompareTemperature}
           />
         </section>
+
+        {/* Public Health High-Risk Warnings */}
+        <NotificationBanner
+          cityA={selectedCity}
+          simulationA={simulation}
+          temperatureA={temperature}
+          cityB={compareCity}
+          simulationB={simulationB}
+          temperatureB={compareTemperature}
+          isComparisonMode={isComparisonMode}
+          activePolicies={activePolicies}
+          onTogglePolicy={handleTogglePolicy}
+        />
 
         {/* Dynamic Focus Tabs (Track 2, Track 3, UNLEASH Sandbox) & Comparison Toggle */}
         <div className="border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4" id="dashboard-navigation-tabs">
