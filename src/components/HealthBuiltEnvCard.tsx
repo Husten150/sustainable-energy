@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HostCity, Intervention, SimulationResult, GeminiAnalysis } from "../types";
 import { MapPin, ThermometerSun, ShieldAlert, HeartPulse, Activity, Sparkles, AlertTriangle, RefreshCw } from "lucide-react";
+import LiveMapsExplorer from "./LiveMapsExplorer";
 
 interface HealthBuiltEnvCardProps {
   selectedCity: HostCity;
@@ -374,6 +375,9 @@ export default function HealthBuiltEnvCard({
           <div className="text-slate-400 text-xs py-4 text-center font-mono">FAILED TO ACQUIRE THERMAL SENSITIVITY VECTOR DATA.</div>
         )}
       </div>
+
+      {/* Live Google Maps Grounded safe havens locator */}
+      <LiveMapsExplorer selectedCity={selectedCity} />
     </div>
   );
 }

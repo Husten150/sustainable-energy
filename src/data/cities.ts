@@ -18,7 +18,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 75, y: 35 },
       transitHub: { x: 25, y: 65 },
       hospital: { x: 70, y: 70 }
-    }
+    },
+    lat: 47.5952,
+    lng: -122.3316
   },
   {
     id: "bayarea",
@@ -37,7 +39,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 78, y: 40 },
       transitHub: { x: 20, y: 70 },
       hospital: { x: 82, y: 75 }
-    }
+    },
+    lat: 37.403,
+    lng: -121.970
   },
   {
     id: "losangeles",
@@ -56,7 +60,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 80, y: 50 },
       transitHub: { x: 30, y: 80 },
       hospital: { x: 85, y: 80 }
-    }
+    },
+    lat: 33.953,
+    lng: -118.339
   },
   {
     id: "kansascity",
@@ -75,7 +81,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 85, y: 45 },
       transitHub: { x: 20, y: 60 },
       hospital: { x: 75, y: 75 }
-    }
+    },
+    lat: 39.049,
+    lng: -94.484
   },
   {
     id: "dallas",
@@ -94,7 +102,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 85, y: 55 },
       transitHub: { x: 15, y: 60 },
       hospital: { x: 65, y: 80 }
-    }
+    },
+    lat: 32.747,
+    lng: -97.093
   },
   {
     id: "houston",
@@ -113,7 +123,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 80, y: 60 },
       transitHub: { x: 20, y: 75 },
       hospital: { x: 60, y: 85 }
-    }
+    },
+    lat: 29.685,
+    lng: -95.408
   },
   {
     id: "atlanta",
@@ -132,7 +144,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 82, y: 42 },
       transitHub: { x: 22, y: 72 },
       hospital: { x: 72, y: 82 }
-    }
+    },
+    lat: 33.757,
+    lng: -84.401
   },
   {
     id: "miami",
@@ -151,7 +165,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 78, y: 38 },
       transitHub: { x: 18, y: 68 },
       hospital: { x: 68, y: 78 }
-    }
+    },
+    lat: 25.958,
+    lng: -80.239
   },
   {
     id: "philadelphia",
@@ -170,7 +186,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 80, y: 35 },
       transitHub: { x: 25, y: 60 },
       hospital: { x: 70, y: 75 }
-    }
+    },
+    lat: 39.901,
+    lng: -75.167
   },
   {
     id: "newyork",
@@ -189,7 +207,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 82, y: 38 },
       transitHub: { x: 28, y: 64 },
       hospital: { x: 74, y: 78 }
-    }
+    },
+    lat: 40.814,
+    lng: -74.074
   },
   {
     id: "boston",
@@ -208,7 +228,9 @@ export const HOST_CITIES: HostCity[] = [
       hotelCorridor: { x: 82, y: 32 },
       transitHub: { x: 22, y: 62 },
       hospital: { x: 72, y: 72 }
-    }
+    },
+    lat: 42.091,
+    lng: -71.264
   }
 ];
 

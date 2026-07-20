@@ -1,6 +1,7 @@
 import React from "react";
 import { HostCity, Intervention, SimulationResult } from "../types";
 import { HeartPulse, Activity, ShieldAlert, ThermometerSun, CheckCircle } from "lucide-react";
+import LiveMapsExplorer from "./LiveMapsExplorer";
 
 interface HealthBuiltEnvComparisonProps {
   cityA: HostCity;
@@ -355,6 +356,28 @@ export default function HealthBuiltEnvComparison({
               {activePolicies.some((p) => p.id === "thermal_paving") ? "Active" : "Deploy"}
             </span>
           </button>
+        </div>
+      </div>
+
+      {/* Comparative Live Maps Grounding Exploration Section */}
+      <div className="border-t border-white/10 pt-6 space-y-4">
+        <h4 className="text-xs font-sans font-extrabold text-slate-100 uppercase tracking-widest flex items-center gap-2">
+          <ThermometerSun className="w-4 h-4 text-amber-500" />
+          Comparative Safe Haven GIS Analytics
+        </h4>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider block bg-emerald-500/5 border border-emerald-500/10 px-3 py-1.5 rounded-md">
+              LOCATIONAL NODE A: {cityA.name} ({cityA.stadium})
+            </span>
+            <LiveMapsExplorer selectedCity={cityA} />
+          </div>
+          <div className="space-y-3">
+            <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider block bg-cyan-500/5 border border-cyan-500/10 px-3 py-1.5 rounded-md">
+              LOCATIONAL NODE B: {cityB.name} ({cityB.stadium})
+            </span>
+            <LiveMapsExplorer selectedCity={cityB} />
+          </div>
         </div>
       </div>
     </div>

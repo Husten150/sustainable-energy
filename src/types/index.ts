@@ -16,6 +16,8 @@ export interface HostCity {
     transitHub: { x: number; y: number };
     hospital: { x: number; y: number };
   };
+  lat?: number;
+  lng?: number;
 }
 
 export interface Intervention {
