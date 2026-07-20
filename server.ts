@@ -65,9 +65,10 @@ const hostCities = [
 ];
 
 // Helper to provide a rich fallback when Gemini is unavailable
-function getMockCityAnalysis(cityId: string, temp: number, activePolicies: string[]) {
+function getMockCityAnalysis(cityId: string, temp: number, activePolicies: string[] = []) {
   const city = hostCities.find(c => c.id === cityId) || hostCities[0];
-  const totalPolicies = activePolicies.length;
+  const policies = Array.isArray(activePolicies) ? activePolicies : [];
+  const totalPolicies = policies.length;
   
   const impactMultiplier = Math.max(0.2, 1 - (totalPolicies * 0.15));
   const heatRisk = temp > 95 ? "CRITICAL" : temp > 85 ? "HIGH" : "MODERATE";
@@ -84,7 +85,7 @@ function getMockCityAnalysis(cityId: string, temp: number, activePolicies: strin
               `3. **Water Stress**: Drinking water demand is amplified. Pitch irrigation requires deep cooling cycles. ` +
               `Water consumption is estimated at ${Math.round(1800 * (temp / 75) * impactMultiplier)} kL/day.\n` +
               `4. **Waste Management**: Spectators will generate approx ${Math.round(45 * (city.capacity / 70000))} tons of mixed waste per match. ` +
-              `Current active green policies cover: ${activePolicies.length > 0 ? activePolicies.join(", ") : "None. Please activate interventions above to reduce footprint."}.`,
+              `Current active green policies cover: ${policies.length > 0 ? policies.join(", ") : "None. Please activate interventions above to reduce footprint."}.`,
     interventions: [
       {
         title: "Deploy Additional Hydration Nodes",
@@ -104,12 +105,12 @@ function getMockCityAnalysis(cityId: string, temp: number, activePolicies: strin
 
 // API endpoint to analyze current host city metrics
 app.post("/api/gemini/analyze", async (req, res) => {
-  const { cityId, temperature, activePolicies } = req.body;
-  const city = hostCities.find(c => c.id === cityId);
+  const body = req.body || {};
+  const cityId = body.cityId || "seattle";
+  const temperature = typeof body.temperature === "number" ? body.temperature : (Number(body.temperature) || 85);
+  const activePolicies = Array.isArray(body.activePolicies) ? body.activePolicies : [];
   
-  if (!city) {
-    return res.status(400).json({ error: "Invalid city ID" });
-  }
+  const city = hostCities.find(c => c.id === cityId) || hostCities[0];
 
   try {
     const ai = getGeminiClient();
@@ -179,7 +180,10 @@ app.post("/api/gemini/analyze", async (req, res) => {
 
 // API endpoint for UNLEASH Innovation Sandbox (Ideation)
 app.post("/api/unleash/ideate", async (req, res) => {
-  const { cityId, userIdea, challengeArea } = req.body;
+  const body = req.body || {};
+  const cityId = body.cityId || "seattle";
+  const userIdea = body.userIdea || "No idea provided";
+  const challengeArea = body.challengeArea || "General";
   const city = hostCities.find(c => c.id === cityId) || hostCities[0];
 
   try {
@@ -342,7 +346,9 @@ ${places.map((p, idx) => `${idx + 1}. **${p.title}**
 
 // API endpoint for Live Google Maps Grounding Search
 app.post("/api/gemini/maps", async (req, res) => {
-  const { cityId, queryType } = req.body;
+  const body = req.body || {};
+  const cityId = body.cityId || "seattle";
+  const queryType = body.queryType || "cooling";
   const city = hostCities.find(c => c.id === cityId) || hostCities[0];
 
   const queryLabels: Record<string, string> = {
